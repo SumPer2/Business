@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аналоговые часы</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        
+        .clock {
+            width: 300px;
+            height: 300px;
+            border: 10px solid #333;
+            border-radius: 50%;
+            position: relative;
+            background: #f8f8f8;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+        }
+        
+        .hand {
+            position: absolute;
+            left: 50%;
+            bottom: 50%;
+            transform-origin: 50% 100%;
+            z-index: 8;
+        }
+        
+        .hour-hand {
+            width: 8px;
+            height: 80px;
+            margin-left: -4px;
+            background: #333;
+        }
+        
+        .minute-hand {
+            width: 4px;
+            height: 120px;
+            margin-left: -2px;
+            background: #333;
+        }
+        
+        .second-hand {
+            width: 2px;
+            height: 140px;
+            margin-left: -1px;
+            background: #e74c3c;
+            z-index: 9;
+        }
+        
+        .center-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #333;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+        
+        .number {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .number div {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            transform: translate(-50%, -50%);
+        }
+        
+        .controls {
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Аналоговые часы</h1>
+    <div class="clock">
+        <div class="number" id="numbers"></div>
+        <div class="hand hour-hand"></div>
+        <div class="hand minute-hand"></div>
+        <div class="hand second-hand"></div>
+        <div class="center-circle"></div>
+    </div>
+    <div class="controls">
+        <button id="startBtn">Старт</button>
+        <button id="pauseBtn">Пауза</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Получаем элементы DOM
+            const hourHand = document.querySelector('.hour-hand');
+            const minuteHand = document.querySelector('.minute-hand');
+            const secondHand = document.querySelector('.second-hand');
+            const numbersContainer = document.getElementById('numbers');
+            const startBtn = document.getElementById('startBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            
+            let timerId = null;
+            
+            // Создаем цифры циферблата
+            for (let i = 1; i <= 12; i++) {
+                const number = document.createElement('div');
+                const angle = i * 30;
+                const radius = 120;
+                
+                const x = Math.sin(angle * Math.PI / 180) * radius;
+                const y = -Math.cos(angle * Math.PI / 180) * radius;
+                
+                number.textContent = i;
+                number.style.left = `calc(50% + ${x}px)`;
+                number.style.top = `calc(50% + ${y}px)`;
+                numbersContainer.appendChild(number);
+            }
+            
+            // Функция обновления времени
+            function updateClock() {
+                const now = new Date();
+                const hours = now.getHours();
+                const minutes = now.getMinutes();
+                const seconds = now.getSeconds();
+                
+                // Рассчитываем углы
+                const hourAngle = 30 * (hours % 12) + 0.5 * minutes;
+                const minuteAngle = 6 * minutes + 0.1 * seconds;
+                const secondAngle = 6 * seconds;
+                
+                // Применяем поворот
+                hourHand.style.transform = `rotate(${hourAngle}deg)`;
+                minuteHand.style.transform = `rotate(${minuteAngle}deg)`;
+                secondHand.style.transform = `rotate(${secondAngle}deg)`;
+            }
+            
+            // Запуск часов
+            function startClock() {
+                if (!timerId) {
+                    updateClock();
+                    timerId = setInterval(updateClock, 1000);
+                }
+            }
+            
+            // Остановка часов
+            function pauseClock() {
+                if (timerId) {
+                    clearInterval(timerId);
+                    timerId = null;
+                }
+            }
+            
+            // Назначаем обработчики
+            startBtn.addEventListener('click', startClock);
+            pauseBtn.addEventListener('click', pauseClock);
+            
+            // Автозапуск
+            startClock();
+        });
+    </script>
+</body>
+</html>
